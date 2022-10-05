@@ -325,7 +325,7 @@ class Application(tk.Frame):
         TimeStart = time.time()
 
         #load data
-        matfilename ='String_4b'
+        matfilename ='String4b'
         mat = scipy.io.loadmat(path + '/' + matfilename + '.mat')
         lImages = mat['DepthImg']
         self.pos2d = mat['Pos2D']
