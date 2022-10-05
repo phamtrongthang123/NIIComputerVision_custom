@@ -1,0 +1,10 @@
+*.pyc
+*.dae
+*.ply
+*.npy
+*~
+code/CloudsOfPointsCompare.py
+code/TEST*
+code/meshes
+__pycache__
+test*

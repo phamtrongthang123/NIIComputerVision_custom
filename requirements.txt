@@ -1,0 +1,10 @@
+Mako
+opencv-python==4.2.0.32 
+numpy 
+scikit-learn 
+scikit-image 
+Pillow 
+scipy 
+pandas 
+pyquaternion
+pyopencl[pocl] 
