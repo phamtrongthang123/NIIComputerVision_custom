@@ -15,6 +15,7 @@ import scipy as sp
 import pandas
 import warnings
 import copy
+import sys 
 from sklearn.neighbors import NearestNeighbors
 
 RGBD = imp.load_source('RGBD', './lib/RGBD.py')
@@ -30,6 +31,7 @@ def Exponential(qsi):
     :param qsi: 6D vector
     :return: 4*4 incremental transfo matrix for camera pose estimation
     '''
+    print("Call tracking::{}".format(sys._getframe(0).f_code.co_name))
     theta = LA.norm(qsi[3:6])
     res = np.identity(4)
 
@@ -73,6 +75,7 @@ def Logarithm(Mat):
     :param Mat: 4*4 transformation matrix
 translation    :return: a 6D vector containing rotation and translation parameters
     '''
+    print("Call tracking::{}".format(sys._getframe(0).f_code.co_name))
     trace = Mat[0,0]+Mat[1,1]+Mat[2,2]
     theta = acos((trace-1.0)/2.0)
 
@@ -115,6 +118,7 @@ class Tracker():
     """
     Tracking camera pose class
     """
+    
 
     def __init__(self, thresh_dist, thresh_norm, lvl, max_iter):
         """
@@ -124,6 +128,7 @@ class Tracker():
         :param lvl:
         :param max_iter: maximum number of iteration
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.thresh_dist = thresh_dist
         self.thresh_norm = thresh_norm
         self.lvl = lvl
@@ -138,6 +143,7 @@ class Tracker():
         :param Image2:  Second RGBD images
         :return: Transform matrix between Image1 and Image2
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # Init
         res = np.identity(4)
@@ -252,6 +258,7 @@ class Tracker():
         :param Image2:  Second RGBD images
         :return: Transform matrix between Image1 and Image2
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         res = np.array([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]], dtype = np.float32)
 
 
@@ -387,6 +394,7 @@ class Tracker():
         :param Pose:  estimate of the pose of the current image
         :return: Transform matrix between Image1 and the mesh (transform from the first frame to the current frame)
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         res = Pose
 
         line_index = 0
@@ -507,6 +515,7 @@ class Tracker():
         :param MeshNmls: list of normales of the mesh
         :return: Transform matrix between Image1 and the mesh (transform from the first frame to the current frame)
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # Initializing the res with the current Pose so that mesh that are in a local coordinates can be
         # transform in the current frame and thus enabling ICP.
@@ -658,6 +667,7 @@ class Tracker():
         :param depthImg, intrinsic, planes: use to calculate the projection and transform
         :return: new Transform matrix of all bone's
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         bonelist = [[5,6],[4,5],[20,4],[9,10],[8,9],[20,8], \
         [13,14],[12,13],[0,12],[17,18],[16,17],[0,16], \
@@ -733,6 +743,7 @@ from pyquaternion import Quaternion
 
 # energy function
 def ICP_R_ls(DQ_1D, src, dis, Tr, Trp, Tr_ori, Nml):
+    print("Call tracking::{}".format(sys._getframe(0).f_code.co_name))
     R = General.getMatrixfromDualQuaternion(DQ_1D.reshape((2,4)))[0:3,0:3]
 
     src = np.dot(R, src.T).T

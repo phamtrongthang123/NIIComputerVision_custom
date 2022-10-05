@@ -5,7 +5,7 @@ Cross module functions
 
 import numpy as np
 from numpy import linalg as LA
-
+import sys 
 
 
 
@@ -15,6 +15,7 @@ def in_mat_zero2one(mat):
     :param mat: input matrix containing 0
     :return:  mat with 1 instead of 0
     """
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     mat_tmp = (mat != 0.0)
     res = mat * mat_tmp + ~mat_tmp
     return res
@@ -29,6 +30,7 @@ def InvPose(Pose):
     y = R*x + T
     x = R^(-1)*y - R^(-1)*T
     """
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     PoseInv = np.zeros(Pose.shape, Pose.dtype)
     # Inverse rotation part R^(-1)
     PoseInv[0:3, 0:3] = LA.inv(Pose[0:3, 0:3])
@@ -44,6 +46,7 @@ def normalized_cross_prod(a, b):
     :param b: second 3 elements vector
     :return: the normalized cross product between 2 vector
     '''
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     res = np.zeros(3, dtype="float")
     if (LA.norm(a) == 0.0 or LA.norm(b) == 0.0):
         return res
@@ -68,6 +71,7 @@ def division_by_norm(mat, norm):
     :param norm:
     :return:
     '''
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     for i in range(3):
         with np.errstate(divide='ignore', invalid='ignore'):
             mat[:, :, i] = np.true_divide(mat[:, :, i], norm)
@@ -83,6 +87,7 @@ def normalized_cross_prod_optimize(a, b):
     :param b: second 3 elements vector
     :return: the normalized cross product between 2 vector
     """
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     # res = np.zeros(a.Size, dtype = "float")
     norm_mat_a = np.sqrt(np.sum(a * a, axis=2))
     norm_mat_b = np.sqrt(np.sum(b * b, axis=2))
@@ -107,6 +112,7 @@ def getConnectBP(bp):
     :param bp: the index of body part
     :retrun: connected bp list
     '''  
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     if bp==1:
         bp_n = [2,12]
     elif bp==2:
@@ -144,6 +150,7 @@ def getBodypartPoseIndex(bp):
     :param bp: the index of body part
     :retrun: connected bp list
     ''' 
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     if bp==1:
         pos = [5,6]
     if bp==2:
@@ -181,6 +188,7 @@ def GetRotatefrom2Vector(a, b):
     :param b: end vector
     :return: Rotation Matrix
     '''
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     a = a/LA.norm(a)
     b = b/LA.norm(b)
     v = np.cross(a,b)
@@ -195,6 +203,7 @@ def GetRotatefrom2Vector(a, b):
 
 '''Dual Quaternion'''
 def getQuaternionfromMatrix(mat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     quat = np.zeros(4, dtype=np.float32)
     tr = mat[0,0]+mat[1,1]+mat[2,2]
     if tr>0:
@@ -224,21 +233,25 @@ def getQuaternionfromMatrix(mat):
     return quat
 
 def getQuaternionConj(quat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     quat[1:4] *= -1
     return quat
 
 def getQuaternionMul(quat1, quat2):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     quat = np.zeros(4, dtype = np.float32)
     quat[0] = quat1[0]*quat2[0] - np.dot(quat1[1:4], quat2[1:4])
     quat[1:4] = quat1[0]*quat2[1:4]+quat2[0]*quat1[1:4]+np.cross(quat1[1:4], quat2[1:4])
     return quat
 
 def getQuaternionNormalize(quat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     if np.dot(quat,quat)!= 0:
         return quat/pow(np.dot(quat,quat),1/2)
     return 0
 
 def getDualQuaternionfromMatrix(mat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     quatReal = getQuaternionfromMatrix(mat)
     quatReal = getQuaternionNormalize(quatReal)
     quatDual = np.zeros(4, dtype=np.float32)
@@ -250,11 +263,13 @@ def getDualQuaternionfromMatrix(mat):
     return dquat
 
 def getDualQuaternionConj(dquat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     dquat[0,:] = getQuaternionConj(dquat[0,:])
     dquat[1,:] = getQuaternionConj(dquat[1,:])
     return dquat
 
 def getDualQuaternionMul(dquat1, dquat2):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     dquat = np.zeros((2,4), dtype=np.float32)
     dquat[0,:] = getQuaternionMul(dquat1[0,:], dquat2[0,:])
     dquat[1,:] = getQuaternionMul(dquat1[0,:], dquat2[1,:])
@@ -262,6 +277,7 @@ def getDualQuaternionMul(dquat1, dquat2):
     return dquat
 
 def getDualQuaternionNormalize(dquat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     mag = dquat[0][0]*dquat[0][0]+dquat[0][1]*dquat[0][1]
     mag += dquat[0][2]*dquat[0][2]+dquat[0][3]*dquat[0][3]
     mag = pow(float(mag), 0.5)
@@ -270,6 +286,7 @@ def getDualQuaternionNormalize(dquat):
     return 0
 
 def getMatrixfromDualQuaternion(dquat):
+    print("Call General::{}".format(sys._getframe(0).f_code.co_name))
     dquat = dquat.reshape((2,4))
     dquat = getDualQuaternionNormalize(dquat)
     mat = np.identity(4, dtype=np.float32)

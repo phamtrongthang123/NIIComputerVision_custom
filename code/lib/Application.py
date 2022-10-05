@@ -16,7 +16,7 @@ import scipy.io
 import time
 from skimage.draw import line_aa
 from plyfile import PlyData, PlyElement
-
+import sys 
 RGBD = imp.load_source('RGBD', './lib/RGBD.py')
 TrackManager = imp.load_source('TrackManager', './lib/tracking.py')
 TSDFtk = imp.load_source('TSDFtk', './lib/TSDF.py')
@@ -40,6 +40,7 @@ class Application(tk.Frame):
         :param event: press a button on the keyboard
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         Transfo = np.array([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]])
 
         if (event.keysym == 'Escape'):
@@ -107,6 +108,7 @@ class Application(tk.Frame):
         :return: none
 
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.x_init = event.x
         self.y_init = event.y
 
@@ -116,6 +118,7 @@ class Application(tk.Frame):
         :param event: a click with the mouse
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         x = event.x
         y = event.y
 
@@ -127,6 +130,7 @@ class Application(tk.Frame):
         :param event: moving mouse when a button is pressed
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if (event.y < 426):
             delta_x = event.x - self.x_init
             delta_y = event.y - self.y_init
@@ -194,6 +198,7 @@ class Application(tk.Frame):
         :param color: Color of the point
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if point[0]>0 and point[1]>0:
             x1, y1 = (point[0] - radius), (point[1] - radius)
             x2, y2 = (point[0] + radius), (point[1] + radius)
@@ -232,6 +237,7 @@ class Application(tk.Frame):
         :param Pose: transformation
         :return
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         pos2D = self.pos2d[0][self.Index].astype(np.int16)-1
         pos = self.RGBD[0].GetProjPts2D_optimize(self.RGBD[0].Vtx[pos2D[:,1], pos2D[:,0]],Pose)
 
@@ -253,6 +259,7 @@ class Application(tk.Frame):
 
     def DrawSys2D(self,Pose):
         '''this function draw the sys of oriented coordinates system for each body part'''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # Compute the coordinates system of each body parts
         self.RGBD[0].GetNewSys(Pose,self.ctr2D,10)
         # Draw it
@@ -271,6 +278,7 @@ class Application(tk.Frame):
         '''
         Draw in the canvas the Oriented Bounding Boxes (OBB) for each body part
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.OBBcoords2D = []
         self.OBBcoords2D.append([0.,0.,0.])
         # for each body part
@@ -298,6 +306,7 @@ class Application(tk.Frame):
         :param GPUManager: GPU environment
         :param master: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # Init
         self.root = master

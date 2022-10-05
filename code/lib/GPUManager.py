@@ -9,6 +9,7 @@ Created on Tue Mar 28 11:13:40 2017
 import pyopencl as cl
 import imp
 import os
+import sys 
 os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 KernelsOpenCL = imp.load_source('KernelsOpenCL', './lib/KernelsOpenCL.py')
 
@@ -32,6 +33,7 @@ class GPUManager():
         """
         Constructor
         """
+        print("Call GPUManagaer::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.platform = cl.get_platforms()[0]
         self.devices = self.platform.get_devices()
         # select the device you want to work with
@@ -45,6 +47,7 @@ class GPUManager():
         Display information on selected devices
         :return:  none
         """
+        print("Call GPUManagaer::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         print ('\n' + '=' * 60 + '\nOpenCL Platforms and Devices')
         print('=' * 60)
         print('Platform - Name: ' + self.platform.name)
@@ -71,6 +74,7 @@ class GPUManager():
         Load programs with its kernels
         :return: none
         """
+        print("Call GPUManagaer::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.programs['FuseTSDF'] = cl.Program(self.context, KernelsOpenCL.Kernel_FuseTSDF).build()
         self.programs['Test'] = cl.Program(self.context, KernelsOpenCL.Kernel_Test).build()
         

@@ -11,6 +11,7 @@ import numpy as np
 from numpy import linalg as LA
 import pyopencl as cl
 from array import array
+import sys 
 
 RGBD = imp.load_source('RGBD', './lib/RGBD.py')
 GPU = imp.load_source('GPUManager', './lib/GPUManager.py')
@@ -40,6 +41,7 @@ class TSDFManager():
         :param coordC: the corners of bounding-box in conacial frame
         :param Tg: transform from the local coordinate to global coordinate
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #dimensions
         self.Size = Size
         self.c_x = Size[0]/2
@@ -93,6 +95,7 @@ class TSDFManager():
         :param bp: the indexof body part
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # initialize buffers
         #cl.enqueue_write_buffer(self.GPUManager.queue, self.Pose_GPU, Tg)
         cl.enqueue_write_buffer(self.GPUManager.queue, self.DepthGPU, Image.depth_image)
@@ -128,6 +131,7 @@ class TSDFManager():
         :return: none
         NOT USED FUNCTIONS
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         print self.c_x
         print self.dim_x
         print self.c_y
@@ -231,6 +235,7 @@ class TSDFManager():
         :return: none
         NOT USED FUNCTIONS
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         Transform = Pose#LA.inv(Pose)
 
         nu = 0.05

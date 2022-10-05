@@ -10,6 +10,7 @@ import math
 from numpy import linalg as LA
 import imp
 import time
+import sys 
 
 PI = math.pi
 RGBD = imp.load_source('RGBD', './lib/RGBD.py')
@@ -33,6 +34,7 @@ class BodyParts():
         :param RGBD_BP: Image containing just the body part
         :param Tlg: Transform local to global for the concerned body parts
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.GPUManager = GPUManager
         self.RGBD = RGBD
         self.Tlg =Tlg
@@ -47,6 +49,7 @@ class BodyParts():
         :param jointDQ: first frame bind matrix in dual quaternion type
         :return:  none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # need to put copy transform amtrix in PoseBP for GPU
         PoseBP = np.array([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]], dtype = np.float32)

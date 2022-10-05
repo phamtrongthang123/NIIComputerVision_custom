@@ -12,6 +12,7 @@ __kernel void Test(__global float *TSDF) {
         int y = get_global_id(1); /*width*/
         int z = get_global_id(2); /*depth*/
         TSDF[x + 512*y + 512*512*z] = 1.0f;
+        printf("Call KernelsOpenCL::Kernel_Test\\n");
 }
 """
 #__global float *prevTSDF, __global float *Weight
@@ -24,6 +25,7 @@ __kernel void FuseTSDF(__global short int *TSDF,  __global float *Depth, __const
         //const sampler_t smp =  CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
 
         const float nu = 0.05f;
+        printf("Call KernelsOpenCL::Kernel_FuseTSDF\\n");
 
 
         float4 pt;

@@ -9,3 +9,4 @@ code/meshes
 __pycache__
 test*
 env_*
+*called.txt

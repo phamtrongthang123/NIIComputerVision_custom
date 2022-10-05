@@ -16,6 +16,7 @@ import copy
 from scipy.interpolate import griddata
 from scipy.linalg import polar
 from pyquaternion import Quaternion
+import sys 
 PI = math.pi
 
 General = imp.load_source('General', './lib/General.py')
@@ -29,6 +30,7 @@ class Stitch():
         Constructor
         :param number_bodyPart: number of body parts
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.nb_bp = number_bodyPart
         self.StitchedVertices = 0
         self.StitchedFaces = 0
@@ -42,6 +44,7 @@ class Stitch():
         :param boneSubTrans: all parent bone's transform
         :return: bone's DQ, joint's DQ
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #plane3
         sm = 1
         if bp==1:
@@ -173,6 +176,7 @@ class Stitch():
         :param Tg: the transform matrix from local to global
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #Initialize values from the list of
         ConcatVtx = self.StitchedVertices
         ConcatFaces = self.StitchedFaces
@@ -205,6 +209,7 @@ class Stitch():
         :param s: subsampling factor
         :return: list of transformed vertices
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         stack_pt = np.ones(np.size(Vtx,0), dtype = np.float32)
         pt = np.stack( (Vtx[ ::s,0],Vtx[ ::s,1],Vtx[ ::s,2],stack_pt),axis =1 )
         pt = np.dot(pt, Tg.T)
@@ -271,6 +276,7 @@ class Stitch():
         :param s: subsampling factor
         :return: list of transformed normales
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         nmle = np.zeros((Nmls.shape[0], Nmls.shape[1]), dtype = np.float32)
         nmle[ ::s,:] = np.dot(Nmls[ ::s,:],Tg[0:3,0:3].T)
 
@@ -317,6 +323,7 @@ class Stitch():
         :param Tg : local to global transform
         TEST FUNCTION : TURN THE LEFT ARM OF THE SEGMENTED BODY.
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # Rotate skeleton right arm
         angley = angle  # pi * 2. * delta_x / float(Size[0])
@@ -384,6 +391,7 @@ class Stitch():
         :param BBTrans: the transform matrix of  bounding-boxes in Canonical frame
         :return: the new bounding-boxes in global and the transform matrix of bounding-boxes
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         AllrelatedBone = [ [],\
         [[1],[1],[0],[0]], [[1],[14],[14],[1]], \
         [[4],[4],[3],[3]], [[4],[4],[14],[14]], \
@@ -468,6 +476,7 @@ class Stitch():
         :param skeVtx_prev: the skeleton Vtx in previous frame
         :return: calculated SkeVtx
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         bonelist = [[5,6],[4,5],[20,4],[9,10],[8,9],[20,8], \
         [13,14],[12,13],[0,12],[17,18],[16,17],[0,16], \
         [20,2],[2,3],[1,20],[0,1], \
@@ -551,6 +560,7 @@ class Stitch():
         :param pose : the camera transformation from prev to cur
         :return: Matrix containing the coordinates systems
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # compute the 3D centers point of the bounding boxes using the skeleton
         ctr = np.array([0.0, 0.0, 0.0, 1.0], np.float)
         Tg = RGBD.TransfoBB[bp]
@@ -638,6 +648,7 @@ class Stitch():
         :param bp: number of the body part
         :return: return the junctions corresponding to the body parts
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         mid = 0
         if bp ==1 :
             pos1 = 6  # wrist left

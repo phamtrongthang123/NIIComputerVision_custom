@@ -6,7 +6,7 @@ Created on Mon May  1 13:38:34 2017
 @author: diegothomas
 """
 
-
+import sys 
 import imp
 import numpy as np
 import pyopencl as cl
@@ -29,6 +29,7 @@ class My_MarchingCube():
         :param Iso: isosurface to render
         :param GPUManager: GPU environment
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.Size = Size
         self.res = Res
         self.iso = Iso
@@ -62,6 +63,7 @@ class My_MarchingCube():
         :param VolGPU: Volume given by the TSDF
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.nb_faces[0] = 0
         # Create Buffer for the number of faces
         cl.enqueue_write_buffer(self.GPUManager.queue, self.FaceCounterGPU, self.nb_faces).wait()
@@ -102,6 +104,7 @@ class My_MarchingCube():
         :param times: 0 if you do not want to display the time
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if display != 0:
             start_time3 = time.time()
         path = '../meshes/'
@@ -147,7 +150,7 @@ class My_MarchingCube():
         :return: none
         """
 
-
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if display != 0:
             start_time3 = time.time()
         path = '../meshes/'
@@ -189,6 +192,7 @@ class My_MarchingCube():
         :param display: int, 0 if you do not want to display the time
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if display != 0:
             start_time3 = time.time()
         path = '../meshes/'
@@ -253,6 +257,7 @@ class My_MarchingCube():
             Function to draw the mesh using tkinter
             NOT USED.
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #Draw all faces
         pix = np.array([0., 0., 1.])
         pt = np.array([0., 0., 0., 1.])
@@ -285,6 +290,7 @@ class My_MarchingCube():
             Function to draw the vertices of the mesh using tkinter
             NOT USED.
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #result = np.zeros((Size[0], Size[1], 3), dtype = np.uint8)
         result = background.astype(np.uint8)
         
@@ -317,6 +323,7 @@ class My_MarchingCube():
             Function to transform normals and vertices of the mesh
             NOT USED
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         stack_pt = np.ones(np.size(self.Vertices,0), dtype = np.float32)
         pt = np.stack((self.Vertices[:,0],self.Vertices[:,1],self.Vertices[:,2], stack_pt),axis =1)
         pt = np.dot(Pose,pt.T).T
@@ -329,6 +336,7 @@ class My_MarchingCube():
             Function to compute the normals of the mesh
             NOT USED. (MergeVtx does the job)
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # instanciation
         nb_faces = self.nb_faces[0]
         vectsFaces = np.zeros((2,nb_faces, 3), dtype = np.float)
@@ -360,7 +368,7 @@ class My_MarchingCube():
         Non optimized version for understanding
         THIS FUNCTION IS NOT USED
         '''
-
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # instanciation
         nb_faces = self.nb_faces[0]
         vectsFaces = np.zeros((2, 3), dtype = np.int32)
@@ -391,6 +399,7 @@ class My_MarchingCube():
         This function avoid having duplicate in the lists of vertexes or normales
         THIS METHOD HAVE A GPU VERSION BUT THE GPU HAVE NOT ENOUGH MEMORY TO RUN IT
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         VtxArray_x = np.zeros(self.Size)
         VtxArray_y = np.zeros(self.Size)
         VtxArray_z = np.zeros(self.Size)
@@ -475,6 +484,7 @@ class My_MarchingCube():
             This function is made just to test with the RegisterRGBD function if the data from the mesh are corrects.
             NOT USED
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         result = np.zeros((RGBD.Size[0], RGBD.Size[1], 3), dtype = np.uint8)#
         stack_pix = np.ones( (np.size(Vtx[ ::s,:],0)) , dtype = np.float32)
         stack_pt = np.ones( (np.size(Vtx[ ::s,:],0)) , dtype = np.float32)

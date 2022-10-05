@@ -11,7 +11,7 @@ Created on Wed May  3 11:31:37 2017
 Kernel_MarchingCube = """
 
 //    create the precalculated 256 possible polygon configuration (128 + symmetries)
-
+//printf("Call MarchingCube_KernelsOpenCL::Kernel_MarchingCube\\n");
 __constant int Config[128][4][3] = { {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}}, //0
           {{0, 7, 3}, {0,0,0}, {0,0,0}, {0,0,0}}, // v0 1
           {{0, 1, 4}, {0,0,0}, {0,0,0}, {0,0,0}}, // v1 2
@@ -148,7 +148,7 @@ __constant int ConfigCount[128] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3,
 3, 2, 3, 2, 2, 1 };
 
 __kernel void MarchingCubes(__global short int *TSDF, __global int *Offset, __global int *IndexVal, __global float * Vertices, __global int *Faces,  __constant float *Param, __constant int *Dim) {
-
+        //printf("Call MarchingCube_KernelsOpenCL::Kernel_MarchingCube::MarchingCubes\\n");
         int x = get_global_id(0); /*height*/
         int y = get_global_id(1); /*width*/
         
@@ -300,14 +300,14 @@ __kernel void MarchingCubes(__global short int *TSDF, __global int *Offset, __gl
 Kernel_MarchingCubeIndexing = """
 
 //    create the precalculated 256 possible polygon configuration
-
+//printf("Call MarchingCube_KernelsOpenCL::Kernel_MarchingCubeIndexing\\n");
 __constant int ConfigCount[128] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 2, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3, 1, 2, 2, 3, 
 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3, 2, 3, 3, 2, 3, 4, 4, 3, 3, 4, 4, 3, 4, 3, 3, 2, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 
 3, 2, 3, 3, 4, 3, 4, 4, 3, 3, 4, 4, 3, 4, 3, 3, 2, 2, 3, 3, 4, 3, 4, 2, 3, 3, 4, 4, 3, 4, 3, 3, 2, 3, 4, 4, 3, 4, 3, 3, 2, 4, 3, 
 3, 2, 3, 2, 2, 1 };
 
 __kernel void MarchingCubesIndexing(__global short int *TSDF, __global int *Offset, __global int *IndexVal, __constant int *Dim, const float iso, __global int *faces_counter) {
-
+        //printf("Call MarchingCube_KernelsOpenCL::Kernel_MarchingCubeIndexing::MarchingCubesIndexing\\n");
         int x = get_global_id(0); /*height*/
         int y = get_global_id(1); /*width*/
         
@@ -385,7 +385,7 @@ Kernel_InitArray = """
 __kernel void InitArray(__global int *Array_x, __global int *Array_y, __global int *Array_z, __global int *Weights,
                        __global int *Normale_x, __global int *Normale_y, __global int *Normale_z,
                        __global float * Vertices, __constant float *Param, __constant int *Dim, __global int *vertex_counter, const int nb_faces) {
-
+        //printf("Call MarchingCube_KernelsOpenCL::Kernel_InitArray::InitArray\\n");
         int x = get_global_id(0);
         int y = get_global_id(1); 
         int work_size = get_global_size(1);
@@ -426,7 +426,7 @@ __kernel void MergeVtx(__global int *Array_x, __global int *Array_y, __global in
                        __global int *Normale_x, __global int *Normale_y, __global int *Normale_z,
                        __global int *VtxInd, __global float * Vertices, __global int *Faces,  __constant float *Param, 
                        __constant int *Dim, __global int *vertex_counter, const int nb_faces) {
-
+        //printf("Call MarchingCube_KernelsOpenCL::Kernel_MergeVtx::MergeVtx\\n");
         int x = get_global_id(0);
         int y = get_global_id(1); 
         int work_size = get_global_size(1);
@@ -486,7 +486,7 @@ __kernel void SimplifyMesh(__global int *Array_x, __global int *Array_y, __globa
                        __global int *Normale_x, __global int *Normale_y, __global int *Normale_z,
                        __global int *VtxInd, __global float * Vertices, __global float * Normales, __global int *Faces,
                        __constant int *Dim, const int nb_faces) {
-
+        //printf("Call MarchingCube_KernelsOpenCL::Kernel_SimplifyMesh\\n");
         int x = get_global_id(0); /*height*/
         int y = get_global_id(1); /*width*/
         int work_size = get_global_size(1);

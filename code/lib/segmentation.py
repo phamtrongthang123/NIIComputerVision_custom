@@ -12,7 +12,7 @@ import math
 import time
 import itertools
 import scipy.ndimage.measurements as spm
-
+import sys 
 
 '''These are the order of joints returned by the kinect adaptor.
     SpineBase = 0
@@ -52,6 +52,7 @@ class Segmentation(object):
         :param depthImage: Cropped depth image of the current image
         :param pos2D: list of position of the junction
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.depthImage = depthImage
         self.pos2D = pos2D
         self.bodyPts = []
@@ -67,6 +68,7 @@ class Segmentation(object):
         b is the normalized distance in the y axis
         c is the constant between the two points
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #Be sure A and B are different
         if (A == B).all():
             print "There is no slope between a point and itself"
@@ -95,6 +97,7 @@ class Segmentation(object):
         :param T: max distance to find intersection
         :return: two intersection points between a slope and the edges of the body part
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         line = self.depthImage.shape[0]
         col = self.depthImage.shape[1]
         process_y = abs(a) > abs(b)
@@ -218,6 +221,7 @@ class Segmentation(object):
         :param limit: number of slopes
         :return: the body part filled with true.
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         start_time = time.time()
         line = self.depthImage.shape[0]
         col = self.depthImage.shape[1]
@@ -245,6 +249,7 @@ class Segmentation(object):
         :param limit: number of slopes
         :return: the body part filled with true.
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #start_time = time.time()
         line = self.depthImage.shape[0]
         col = self.depthImage.shape[1]
@@ -275,7 +280,7 @@ class Segmentation(object):
         :param points: array of points which are the corners of the polygon to find
         :return:  the body part filled with true.
         """
-
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #check if there is repeat point in points
         j=0
         for i in range(1, points.shape[0]):
@@ -359,6 +364,7 @@ class Segmentation(object):
         :return: return a point at the edge and between the two legs
         Make drawing will help to understand
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # check which hip is lower
         if (int(hipLeft[0])<int(hipRight[0])):
             # check which hip is lower
@@ -402,6 +408,7 @@ class Segmentation(object):
                   otherwise it will be for the left arm
         :return: an array containing two body parts : an upper arm and a lower arm
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # junction position (-1 adapted for python)
         pos2D = self.pos2D.astype(np.float64)-1
         # Right arm
@@ -563,6 +570,7 @@ class Segmentation(object):
                   otherwise it will be for the left arm
         :return: an array containing two body parts : an upper arm and a lower arm
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         # pos2D[4] = Shoulder_Left
         # pos2D[5] = Elbow_Left
@@ -799,6 +807,7 @@ class Segmentation(object):
                   otherwise it will be for the left leg
         :return: an array containing two body parts : an upper leg and a lower leg
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         pos2D = self.pos2D.astype(np.float64)-1
 
@@ -897,6 +906,7 @@ class Segmentation(object):
                   otherwise it will be for the left leg
         :return: an array containing two body parts : an upper leg and a lower leg
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         pos2D = self.pos2D.astype(np.float64)-1
 
@@ -1008,6 +1018,7 @@ class Segmentation(object):
         :param A: binary depthImag
         :return: head body part
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         pos2D = self.pos2D.astype(np.float64)-1
 
@@ -1053,6 +1064,7 @@ class Segmentation(object):
         :param binaryImage: binary image of the body but all body part are substracted to the body leaving only the trunck and noise
         :return: trunk
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         pos2D = self.pos2D-1
         # find all connected component and label it
@@ -1073,6 +1085,7 @@ class Segmentation(object):
         :param re: is resegment or not
         :return: one hand
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # Right side
         if side == 0 :
             idx = 11 #hand
@@ -1183,7 +1196,7 @@ class Segmentation(object):
         :param re: is resegment or not
         :return: one feet
         """
-
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
 
         #Right Side
         if side == 0 :

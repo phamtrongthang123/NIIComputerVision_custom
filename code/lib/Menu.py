@@ -9,16 +9,19 @@ import cv2
 import Tkinter as tk
 from PIL import ImageTk
 from tkFileDialog import askdirectory
+import sys 
 
 class Menu(tk.Frame):
     """
     Class to handle menu GUI
     """
     def key(self, event):
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if (event.keysym == 'Escape'):
             self.root.destroy()
 
     def callback(self, event):
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         x = event.x
         y = event.y
         if (self.menu_label[y,x,2] == 255 and self.menu_label[y,x,1] == 0 and self.menu_label[y,x,0] == 0):
@@ -27,6 +30,7 @@ class Menu(tk.Frame):
             self.root.destroy()
     
     def __init__(self, master=None):
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.root = master
         
         tk.Frame.__init__(self, master)

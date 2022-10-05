@@ -5,6 +5,7 @@
  Define functions to manipulate RGB-D data
 """
 import cv2
+import sys 
 import numpy as np
 from numpy import linalg as LA
 import random
@@ -36,6 +37,7 @@ class RGBD():
         :param intrinsic: matrix with calibration parameters
         :param fact: factor for converting pixel value to meter or conversely
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.depthname = depthname # useless
         self.colorname = colorname # useless
         self.intrinsic = intrinsic
@@ -49,6 +51,7 @@ class RGBD():
         :param BodyConnection: list of doublons that contains the number of pose that represent adjacent body parts
         :return:  none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.lImages = Images
         self.CImages = ColorImg
         self.hasColor = True
@@ -64,6 +67,7 @@ class RGBD():
         Read an RGB-D image from the disk
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         print(self.depthname)
         self.depth_in = cv2.imread(self.depthname, -1)
         self.color_image = cv2.imread(self.colorname, -1)
@@ -80,6 +84,7 @@ class RGBD():
         :param idx: number of the
         :return:
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         if (idx == -1):
             self.Index = self.Index + 1
         else:
@@ -113,6 +118,7 @@ class RGBD():
         Create the vertex image from the depth image and intrinsic matrice
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.Vtx = np.zeros(self.Size, np.float32)
         for i in range(self.Size[0]): # line index (i.e. vertical y axis)
             for j in range(self.Size[1]): # column index (i.e. horizontal x axis)
@@ -128,6 +134,7 @@ class RGBD():
         Create the vertex image from the depth image and intrinsic matrice
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #self.Vtx = np.zeros(self.Size, np.float32)
         #matrix containing depth value of all pixel
         d = self.depth_image[0:self.Size[0]][0:self.Size[1]]
@@ -149,6 +156,7 @@ class RGBD():
         Compute normal map
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.Nmls = np.zeros(self.Size, np.float32)
         for i in range(1,self.Size[0]-1):
             for j in range(1, self.Size[1]-1):
@@ -168,6 +176,7 @@ class RGBD():
         Compute normal map, CPU optimize algo
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.Nmls = np.zeros(self.Size, np.float32)
         # matrix of normales for each direction
         nmle1 = General.normalized_cross_prod_optimize(self.Vtx[2:self.Size[0],1:self.Size[1]-1] - self.Vtx[1:self.Size[0]-1,1:self.Size[1]-1], \
@@ -199,6 +208,7 @@ class RGBD():
         :param color: if there is a color image put color in the image
         :return: scene projected in 2D space
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         result = np.zeros((self.Size[0], self.Size[1], 3), dtype = np.uint8)
         line_index = 0
         column_index = 0
@@ -240,6 +250,7 @@ class RGBD():
         :param color: if there is a color image put color in the image
         :return: scene projected in 2D space
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         result = rendering#np.zeros((self.Size[0], self.Size[1], 3), dtype = np.uint8)
         stack_pix = np.ones((self.Size[0], self.Size[1]), dtype = np.float32)
         stack_pt = np.ones((np.size(self.Vtx[ ::s, ::s,:],0), np.size(self.Vtx[ ::s, ::s,:],1)), dtype = np.float32)
@@ -286,6 +297,7 @@ class RGBD():
         :param color: if color=0, put color in the image, if color=1, put boolean in the image
         :return: scene projected in 2D space
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         result = rendering#np.zeros((self.Size[0], self.Size[1], 3), dtype = np.uint8)#
         stack_pix = np.ones( (np.size(Vtx[ ::s,:],0)) , dtype = np.float32)
         stack_pt = np.ones( (np.size(Vtx[ ::s,:],0)) , dtype = np.float32)
@@ -333,6 +345,7 @@ class RGBD():
         :param Pose: 4*4 Transformation Matrix
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         stack_pt = np.ones((np.size(self.Vtx,0), np.size(self.Vtx,1)), dtype = np.float32)
         pt = np.dstack((self.Vtx, stack_pt))
         pt = np.dot(Pose,pt.transpose(0,2,1)).transpose(1,2,0)
@@ -347,6 +360,7 @@ class RGBD():
         :param Tr: transformation
         :return: points in 2D coordinate and mask
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         size = vtx.shape
         # find the correspondence 2D point by projection
         stack_pix = np.ones(size[0], dtype = np.float32)
@@ -375,6 +389,7 @@ class RGBD():
         Bilateral filtering the depth image
         see cv2 documentation
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.depth_image = (self.depth_image[:,:] > 0.0) * cv2.bilateralFilter(self.depth_image, d, sigma_color, sigma_space)
 
 
@@ -387,6 +402,7 @@ class RGBD():
         :param binaryImage: a binary image containing several connected component
         :return: A binary image containing only big connected component
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         labeled, n = spm.label(binaryImage)
         size = np.bincount(labeled.ravel())
         #do not consider the background
@@ -403,6 +419,7 @@ class RGBD():
         Generate a cropped depthframe from the previous one. The new frame focuses on the human body
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         pos2D = self.pos2d[0,self.Index].astype(np.int16)
         # extremes points of the bodies
         minV = np.min(pos2D[:,1])
@@ -445,6 +462,7 @@ class RGBD():
         Threshold the depth image in order to to get the whole body alone with the bounding box (BB)
         :return: The connected component that contain the body
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #'''
         pos2D = self.CroppedPos
         max_value = 1
@@ -474,6 +492,7 @@ class RGBD():
         Calls the function in segmentation.py to process the segmentation of the body
         :return:  none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #Initialized segmentation with the cropped image
         self.segm = segm.Segmentation(self.CroppedBox,self.CroppedPos)
         # binary image without bqckground
@@ -586,6 +605,7 @@ class RGBD():
 
     def BodyLabelling(self):
         '''Create label for each body part in the depth_image'''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         Size = self.depth_image.shape
         self.labels = np.zeros(Size,np.int)
         self.labelList = np.zeros((self.bdyPart.shape[0]+1, Size[0], Size[1]),np.int)
@@ -603,6 +623,7 @@ class RGBD():
         """
         add overlap region to each body part
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         interLineList = copy.deepcopy([\
         [[self.segm.foreArmPtsL[0], self.segm.foreArmPtsL[1]], [self.segm.foreArmPtsL[2], self.segm.foreArmPtsL[3]]], \
         [[self.segm.upperArmPtsL[0], self.segm.upperArmPtsL[3]], [self.segm.upperArmPtsL[1], self.segm.upperArmPtsL[2]]], \
@@ -640,6 +661,7 @@ class RGBD():
         Call every method to have a complete segmentation
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.Crop2Body()
         self.BodySegmentation()
         self.AddOverlap()
@@ -656,6 +678,7 @@ class RGBD():
         :param i: number of the body part
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         ctr_x = (max(self.PtCloud[i][:, 0])+min(self.PtCloud[i][:, 0]))/2
         ctr_y = (max(self.PtCloud[i][:, 1])+min(self.PtCloud[i][:, 1]))/2
         ctr_z = (max(self.PtCloud[i][:, 2])+min(self.PtCloud[i][:, 2]))/2
@@ -669,6 +692,7 @@ class RGBD():
         :param i: number of the body part
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         ctr = self.ctr3D[i]#self.coordsGbl[i][0]#[0.,0.,0.]#
         e1 = evecs[0]
         e2 = evecs[1]
@@ -693,6 +717,7 @@ class RGBD():
         :param mask: a matrix containing one only in the body parts indexes, 0 otherwise
         :return:  list of vertices = cloud of points
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         start_time2 = time.time()
         nbPts = sum(sum(mask))
         res = np.zeros((nbPts, 3), dtype = np.float32)
@@ -712,6 +737,7 @@ class RGBD():
         :param mask: a matrix containing one only in the body parts indexes, 0 otherwise
         :return:  list of vertices = cloud of points
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         #start_time2 = time.time()
         nbPts = sum(sum(mask))
 
@@ -738,6 +764,7 @@ class RGBD():
         calculate the skeleton in 3D
         :retrun: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # get pos2D
         pos2D = self.pos2d[0,self.Index].astype(np.double)-1
         # initialize
@@ -816,6 +843,7 @@ class RGBD():
         :param dims_rescaled_data: 3 per default, number of dimension wanted
         :return:  none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # list of center in the 3D space
         self.ctr3D = []
         self.ctr3D.append([0.,0.,0.])
@@ -870,6 +898,7 @@ class RGBD():
         draw the bounding boxes in 3D for each part of the human body
         :param i : number of the body parts
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # Adding a space so that the bounding boxes are wider
         VoxSize = 0.005
         wider = 5*VoxSize*0
@@ -908,6 +937,7 @@ class RGBD():
         build bounding boxes to let no overlapping bounding boxes
         :return: none
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         # settings
         interPointList = copy.deepcopy([[], \
         [self.segm.foreArmPtsL[0], self.segm.foreArmPtsL[1], self.segm.foreArmPtsL[2], self.segm.foreArmPtsL[3]], \
@@ -1052,6 +1082,7 @@ class RGBD():
         :param self.skeVtx self.coordsGbl
         :retrun self.planesF
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.planesF = np.zeros((15,4), dtype=np.float32)
         for bp in range(1,15):
             if bp==1:
@@ -1215,6 +1246,7 @@ class RGBD():
         :param s: subsampling coefficient
         :return: transformed list of 3D vector
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         pix = np.array([0., 0., 1.])
         pt = np.array([0., 0., 0., 1.])
         drawVects = []
@@ -1246,6 +1278,7 @@ class RGBD():
         :param Pose: Transformation matrix
         :return: transformed list of 3D vector
         """
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         '''Project a list of vertexes in the image RGBD'''
         pix = np.array([0., 0., 1.])
         pt = np.array([0., 0., 0., 1.])
@@ -1271,6 +1304,7 @@ class RGBD():
         '''
         compute the coordinates of the points that will create the coordinates system
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         self.drawNewSys = []
         maxDepth = max(0.0001, np.max(self.Vtx[:,:,2]))
 
@@ -1291,6 +1325,7 @@ class RGBD():
         convert an RGB image in RGBA to put all zeros as transparent
         THIS FUNCTION IS NOT USED IN THE PROJECT
         '''
+        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
         img = im_im.convert("RGBA")
         datas = img.getdata()
         newData = []
