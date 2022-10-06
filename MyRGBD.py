@@ -19,8 +19,8 @@ from sklearn.cluster import KMeans
 import copy
 from skimage.draw import line_aa
 
-segm = imp.load_source('segmentation', './lib/segmentation.py')
-General = imp.load_source('General', './lib/General.py')
+segm = imp.load_source('segmentation', './code/lib/segmentation.py')
+General = imp.load_source('General', './code/lib/General.py')
 
 
 
@@ -43,7 +43,7 @@ class RGBD():
         self.intrinsic = intrinsic
         self.fact = fact
 
-    def LoadMat(self, Images,Pos_2D,BodyConnection, ColorImg):
+    def LoadMat(self, Images):
         """
         Load information in datasets into the RGBD object
         :param Images: List of depth images put in function of time
@@ -52,31 +52,11 @@ class RGBD():
         :return:  none
         """
         print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        self.lImages = Images
-        self.CImages = ColorImg
-        self.hasColor = True
-        if self.CImages.shape[0]==0:
-            self.hasColor = False
-        self.numbImages = len(self.lImages.transpose()) # useless
+        self.depth_img = Images
+        # self.numbImages = len(self.depth_img.transpose()) # useless
+        self.numbImages = 1
         self.Index = -1
-        self.pos2d = Pos_2D
-        self.connection = BodyConnection
 
-    def ReadFromDisk(self):
-        """
-        Read an RGB-D image from the disk
-        :return: none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        print(self.depthname)
-        self.depth_in = cv2.imread(self.depthname, -1)
-        self.color_image = cv2.imread(self.colorname, -1)
-
-        self.Size = self.depth_in.shape
-        self.depth_image = np.zeros((self.Size[0], self.Size[1]), np.float32)
-        for i in range(self.Size[0]): # line index (i.e. vertical y axis)
-            for j in range(self.Size[1]):
-                self.depth_image[i,j] = float(self.depth_in[i,j][0]) / self.fact
 
     def ReadFromMat(self, idx = -1):
         """
@@ -90,7 +70,7 @@ class RGBD():
         else:
             self.Index = idx
 
-        depth_in = self.lImages[0][self.Index]
+        depth_in = self.depth_img
         print "Input depth image is of size: " + str(depth_in.shape)
         size_depth = depth_in.shape
         self.Size = (size_depth[0], size_depth[1], 3)
@@ -100,14 +80,15 @@ class RGBD():
         # self.skel = self.depth_image.copy() # useless
 
         # handle positions which are out of boundary
-        self.pos2d[0,idx][:,0] = (np.maximum(0, self.pos2d[0, idx][:,0]))
-        self.pos2d[0,idx][:,1] = (np.maximum(0, self.pos2d[0, idx][:,1]))
-        self.pos2d[0,idx][:,0] = (np.minimum(self.Size[1], self.pos2d[0, idx][:,0]))
-        self.pos2d[0,idx][:,1] = (np.minimum(self.Size[0], self.pos2d[0, idx][:,1]))
+        # we don't need this, we alread cut near far
+        # self.pos2d[0,idx][:,0] = (np.maximum(0, self.pos2d[0, idx][:,0]))
+        # self.pos2d[0,idx][:,1] = (np.maximum(0, self.pos2d[0, idx][:,1]))
+        # self.pos2d[0,idx][:,0] = (np.minimum(self.Size[1], self.pos2d[0, idx][:,0]))
+        # self.pos2d[0,idx][:,1] = (np.minimum(self.Size[0], self.pos2d[0, idx][:,1]))
 
         # get kmeans of image
-        if self.hasColor:
-            self.color_image = self.CImages[0][self.Index]
+        # if self.hasColor:
+        #     self.color_image = self.CImages[0][self.Index]
 
     #####################################################################
     ################### Map Conversion Functions #######################
@@ -200,94 +181,6 @@ class RGBD():
     ################### Projection and transform Functions #######################
     #############################################################################
 
-    def Draw(self, Pose, s, color = 0) :
-        """
-        Project vertices and normales in 2D images
-        :param Pose: camera pose
-        :param s: subsampling the cloud of points
-        :param color: if there is a color image put color in the image
-        :return: scene projected in 2D space
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        result = np.zeros((self.Size[0], self.Size[1], 3), dtype = np.uint8)
-        line_index = 0
-        column_index = 0
-        pix = np.array([0., 0., 1.])
-        pt = np.array([0., 0., 0., 1.])
-        nmle = np.array([0., 0., 0.])
-        for i in range(self.Size[0]/s):
-            for j in range(self.Size[1]/s):
-                pt[0] = self.Vtx[i*s,j*s][0]
-                pt[1] = self.Vtx[i*s,j*s][1]
-                pt[2] = self.Vtx[i*s,j*s][2]
-                pt = np.dot(Pose, pt)
-                pt = pt/pt[:,3].reshape((pt.shape[0], 1))
-                nmle[0] = self.Nmls[i*s,j*s][0]
-                nmle[1] = self.Nmls[i*s,j*s][1]
-                nmle[2] = self.Nmls[i*s,j*s][2]
-                nmle = np.dot(Pose[0:3,0:3], nmle)
-                if (pt[2] != 0.0):
-                    pix[0] = pt[0]/pt[2]
-                    pix[1] = pt[1]/pt[2]
-                    pix = np.dot(self.intrinsic, pix)
-                    column_index = int(round(pix[0]))
-                    line_index = int(round(pix[1]))
-                    if (column_index > -1 and column_index < self.Size[1] and line_index > -1 and line_index < self.Size[0]):
-                        if (color == 0):
-                            result[line_index, column_index] = (self.color_image[i*s,j*s][2], self.color_image[i*s,j*s][1], self.color_image[i*s,j*s][0])
-                        else:
-                            result[line_index, column_index] = (int((nmle[0] + 1.0)*(255./2.)), int((nmle[1] + 1.0)*(255./2.)), int((nmle[2] + 1.0)*(255./2.)))
-
-        return result
-
-
-    def Draw_optimize(self, rendering,Pose, s, color = 0) :
-        """
-        Project vertices and normales from an RGBD image in 2D images
-        :param rendering : 2D image for overlay purpose or black image
-        :param Pose: camera pose
-        :param s: subsampling the cloud of points
-        :param color: if there is a color image put color in the image
-        :return: scene projected in 2D space
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        result = rendering#np.zeros((self.Size[0], self.Size[1], 3), dtype = np.uint8)
-        stack_pix = np.ones((self.Size[0], self.Size[1]), dtype = np.float32)
-        stack_pt = np.ones((np.size(self.Vtx[ ::s, ::s,:],0), np.size(self.Vtx[ ::s, ::s,:],1)), dtype = np.float32)
-        pix = np.zeros((self.Size[0], self.Size[1],2), dtype = np.float32)
-        pix = np.dstack((pix,stack_pix))
-        pt = np.dstack((self.Vtx[ ::s, ::s, :],stack_pt))
-        pt = np.dot(Pose,pt.transpose(0,2,1)).transpose(1,2,0)
-        pt /= pt[:,3].reshape((pt.shape[0], 1))
-        nmle = np.zeros((self.Size[0], self.Size[1],self.Size[2]), dtype = np.float32)
-        nmle[ ::s, ::s,:] = np.dot(Pose[0:3,0:3],self.Nmls[ ::s, ::s,:].transpose(0,2,1)).transpose(1,2,0)
-        #if (pt[2] != 0.0):
-        lpt = np.dsplit(pt,4)
-        lpt[2] = General.in_mat_zero2one(lpt[2])
-        # if in 1D pix[0] = pt[0]/pt[2]
-        pix[ ::s, ::s,0] = (lpt[0]/lpt[2]).reshape(np.size(self.Vtx[ ::s, ::s,:],0), np.size(self.Vtx[ ::s, ::s,:],1))
-        # if in 1D pix[1] = pt[1]/pt[2]
-        pix[ ::s, ::s,1] = (lpt[1]/lpt[2]).reshape(np.size(self.Vtx[ ::s, ::s,:],0), np.size(self.Vtx[ ::s, ::s,:],1))
-        pix = np.dot(self.intrinsic,pix[0:self.Size[0],0:self.Size[1]].transpose(0,2,1)).transpose(1,2,0)
-        column_index = (np.round(pix[::s,::s,0])).astype(int)
-        line_index = (np.round(pix[::s,::s,1])).astype(int)
-        # create matrix that have 0 when the conditions are not verified and 1 otherwise
-        cdt_column = (column_index > -1) * (column_index < self.Size[1])
-        cdt_line = (line_index > -1) * (line_index < self.Size[0])
-        cdt = cdt_column*cdt_line
-        line_index = line_index*cdt
-        column_index = column_index*cdt
-        if (color == 0):
-            result[line_index[:][:], column_index[:][:]]= np.dstack((self.color_image[ ::s, ::s,2], \
-                                                                     self.color_image[ ::s, ::s,1]*cdt_line, \
-                                                                     self.color_image[ ::s, ::s,0]*cdt_column) )
-        else:
-            result[line_index[:][:], column_index[:][:]]= np.dstack( ( (nmle[ ::s, ::s,0]+1.0)*(255./2.)*cdt, \
-                                                                       ((nmle[ ::s, ::s,1]+1.0)*(255./2.))*cdt, \
-                                                                       ((nmle[ ::s, ::s,2]+1.0)*(255./2.))*cdt ) ).astype(int)
-        return result
-
-
     def DrawMesh(self, rendering,Vtx,Nmls,Pose, s, color = 2) :
         """
         Project vertices and normales from a mesh in 2D images
@@ -338,49 +231,6 @@ class RGBD():
         return result
 
 
-    # useless
-    def Transform(self, Pose):
-        """
-        Transform Vertices and Normales with the Pose matrix (generally camera pose matrix)
-        :param Pose: 4*4 Transformation Matrix
-        :return: none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        stack_pt = np.ones((np.size(self.Vtx,0), np.size(self.Vtx,1)), dtype = np.float32)
-        pt = np.dstack((self.Vtx, stack_pt))
-        pt = np.dot(Pose,pt.transpose(0,2,1)).transpose(1,2,0)
-        pt /= pt[:,3].reshape((pt.shape[0], 1))
-        self.Vtx = pt[:,:,0:3]
-        self.Nmls = np.dot(Pose[0:3,0:3],self.Nmls.transpose(0,2,1)).transpose(1,2,0)
-
-    def project3D22D(self, vtx, Tr= np.array([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]], dtype = np.float32)):
-        """
-        Project vertices from 3d coordinate into 2D images
-        :param vtx : points in 3D coordinate
-        :param Tr: transformation
-        :return: points in 2D coordinate and mask
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        size = vtx.shape
-        # find the correspondence 2D point by projection
-        stack_pix = np.ones(size[0], dtype = np.float32)
-        stack_pt = np.ones(size[0], dtype = np.float32)
-        pix = np.zeros((size[0], 2), dtype = np.float32)
-        pix = np.stack((pix[:,0],pix[:,1],stack_pix), axis = 1)
-        pt = np.stack((vtx[:,0],vtx[:,1],vtx[:,2],stack_pt),axis = 1)
-        # transform vertices to camera pose
-        pt = np.dot(Tr, pt.T).T
-        # project to 2D coordinate
-        lpt = np.split(pt, 4, axis=1)
-        lpt[2] = General.in_mat_zero2one(lpt[2])
-        # pix[0] = pt[0]/pt[2]
-        pix[:,0] = (lpt[0]/lpt[2]).reshape(size[0])
-        pix[:,1] = (lpt[1]/lpt[2]).reshape(size[0])
-        pix = np.dot(self.intrinsic,pix.T).T.astype(np.int16)
-        mask = (pix[:,0]>=0) * (pix[:,0]<self.Size[1]) * (pix[:,1]>=0) * (pix[:,1]<self.Size[0])
-
-        return pix, mask
-
 ##################################################################
 ###################Bilateral Smooth Funtion#######################
 ##################################################################
@@ -414,49 +264,6 @@ class RGBD():
         filtered_labeled = keep_labels[labeled]
         return filtered_labeled
 
-    def Crop2Body(self):
-        """
-        Generate a cropped depthframe from the previous one. The new frame focuses on the human body
-        :return: none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        pos2D = self.pos2d[0,self.Index].astype(np.int16)
-        # extremes points of the bodies
-        minV = np.min(pos2D[:,1])
-        maxV = np.max(pos2D[:,1])
-        minH = np.min(pos2D[:,0])
-        maxH = np.max(pos2D[:,0])
-        # distance head to neck. Let us assume this is enough for all borders
-        distH2N = LA.norm( (pos2D[self.connection[0,1]-1]-pos2D[self.connection[0,0]-1])).astype(np.int16)+15
-        # for MIT data
-        '''
-        [row, col] = np.where(self.depth_image>0)
-        minV = np.min(row)
-        maxV = np.max(row)
-        minH = np.min(col)
-        maxH = np.max(col)
-        distH2N = 0
-        '''
-
-        Box = self.depth_image
-        Box_ori = self.depth_image_ori
-        ############ Should check whether the value are in the frame #####################
-        colStart = (minH-distH2N).astype(np.int16)
-        lineStart = (minV-distH2N).astype(np.int16)
-        colEnd = (maxH+distH2N).astype(np.int16)
-        lineEnd = (maxV+distH2N).astype(np.int16)
-        colStart = max(0, colStart)
-        lineStart = max(0, lineStart)
-        colEnd = min(colEnd, self.Size[1])
-        lineEnd = min(lineEnd, self.Size[0])
-
-        self.transCrop = np.array([colStart,lineStart,colEnd,lineEnd])
-        self.CroppedBox = Box[lineStart:lineEnd,colStart:colEnd]
-        self.CroppedBox_ori = Box_ori[lineStart:lineEnd,colStart:colEnd]
-        if self.hasColor:
-            self.CroppedBox_color = self.color_image[lineStart:lineEnd,colStart:colEnd]
-        self.CroppedPos = (pos2D -self.transCrop[0:2]).astype(np.int16)
-
     def BdyThresh(self):
         """
         Threshold the depth image in order to to get the whole body alone with the bounding box (BB)
@@ -487,202 +294,13 @@ class RGBD():
         #'''
         return bw0
 
-    def BodySegmentation(self):
-        """
-        Calls the function in segmentation.py to process the segmentation of the body
-        :return:  none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        #Initialized segmentation with the cropped image
-        self.segm = segm.Segmentation(self.CroppedBox,self.CroppedPos)
-        # binary image without bqckground
-        imageWBG = (self.BdyThresh()>0)
-
-        # Cropped image
-        B = self.CroppedBox
-
-        right = 0
-        left = 1
-        # Process to segmentation algorithm
-        armLeft = self.segm.armSeg(imageWBG,B,left)
-        armRight = self.segm.armSeg(imageWBG,B,right)
-        legRight = self.segm.legSeg(imageWBG,right)
-        legLeft = self.segm.legSeg(imageWBG,left)
-
-        # Retrieve every already segmentated part to the main body.
-        tmp = armLeft[0]+armLeft[1]+armRight[0]+armRight[1]+legRight[0]+legRight[1]+legLeft[0]+legLeft[1]
-        MidBdyImage =(imageWBG-(tmp>0)*1.0)
-
-        # display result
-        # cv2.imshow('trunk' , MidBdyImage.astype(np.float))
-        # cv2.waitKey(0)
-
-        # continue segmentation for hands and feet
-        head = self.segm.headSeg(MidBdyImage)
-        handRight = ( self.segm.GetHand( MidBdyImage,right))
-        handLeft = ( self.segm.GetHand( MidBdyImage,left))
-        footRight = ( self.segm.GetFoot( MidBdyImage,right))
-        footLeft = ( self.segm.GetFoot( MidBdyImage,left))
-
-        # handle the ground near the foot
-        #''' for MIT
-        if self.hasColor:
-            a = (footRight*1.0).reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1],1)) *self.CroppedBox_color
-            #cv2.imshow("a", a)
-            a = a.reshape((self.CroppedBox.shape[0]*self.CroppedBox.shape[1],3))
-            labeled = KMeans(n_clusters=3).fit(a).labels_
-            labeled = labeled.reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1]))
-            footRight = (labeled==labeled[self.CroppedPos[19][1]-1, self.CroppedPos[19][0]-1+5])
-            cv2.imshow("", labeled*1.0/3)
-            cv2.waitKey()
-            a = (footLeft*1.0).reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1],1)) *self.CroppedBox_color
-            a = a.reshape((self.CroppedBox.shape[0]*self.CroppedBox.shape[1],3))
-            labeled = KMeans(n_clusters=3).fit(a).labels_
-            labeled = labeled.reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1]))
-            footLeft = (labeled==labeled[self.CroppedPos[15][1]-1, self.CroppedPos[15][0]-1+5])
-        else:
-            a = (footRight*1.0) *self.CroppedBox_ori
-            a = a.reshape((self.CroppedBox.shape[0]*self.CroppedBox.shape[1],1))
-            labeled = KMeans(n_clusters=3).fit(a).labels_
-            labeled = labeled.reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1]))
-            footRight = (labeled==labeled[self.CroppedPos[19][1]-1, self.CroppedPos[19][0]-1])
-            a = (footLeft*1.0) *self.CroppedBox_ori
-            a = a.reshape((self.CroppedBox.shape[0]*self.CroppedBox.shape[1],1))
-            labeled = KMeans(n_clusters=3).fit(a).labels_
-            labeled = labeled.reshape((self.CroppedBox.shape[0],self.CroppedBox.shape[1]))
-            footLeft = (labeled==labeled[self.CroppedPos[15][1]-1, self.CroppedPos[15][0]-1])
-        #'''
-
-        # display the trunck
-        # cv2.imshow('trunk' , MidBdyImage.astype(np.float))
-        # cv2.waitKey(0)
-
-        # Retrieve again every newly computed segmentated part to the main body.
-        tmp2 = handRight+handLeft+footRight+footLeft+head
-        MidBdyImage2 =(MidBdyImage-(tmp2))
-
-        # Display result
-        # cv2.imshow('MidBdyImage2' , MidBdyImage2.astype(np.float))
-        # cv2.waitKey(0)
-        body = ( self.segm.GetBody( MidBdyImage2)>0)
-
-        # cv2.imshow('body' , body.astype(np.float))
-        # cv2.waitKey(0)
-        #pdb.set_trace()
-
-        # list of each body parts
-        self.bdyPart = np.array( [ armLeft[0], armLeft[1], armRight[0], armRight[1], \
-                                   legRight[0], legRight[1], legLeft[0], legLeft[1], \
-                                   head, body, handRight, handLeft, footLeft,footRight ]).astype(np.int)#]).astype(np.int)#]).astype(np.int)#
-        # list of color for each body parts
-        self.bdyColor = np.array( [np.array([0,0,255]), np.array([200,200,255]), np.array([0,255,0]), np.array([200,255,200]),\
-                                   np.array([255,0,255]), np.array([255,180,255]), np.array([255,255,0]), np.array([255,255,180]),\
-                                   np.array([255,0,0]), np.array([255,255,255]),np.array([0,100,0]),np.array([0,191,255]),\
-                                   np.array([255,165,0]),np.array([199,21,133]) ])
-        self.labelColor = np.array( ["#0000ff", "#ffc8ff", "#00ff00","#c8ffc8","#ff00ff","#ffb4ff",\
-                                   "#ffff00","#ffffb4","#ff0000","#ffffff","#00bfff","#006400",\
-                                   "#c715ff","#ffa500"])
-
-        '''
-        correspondance between number and body parts and color
-        background should have :   color = [0,0,0]       = #000000     black                 label = 0
-        armLeft[0] = forearmL      color = [0,0,255]     = #0000ff     blue                  label = 1
-        armLeft[1] = upperarmL     color = [200,200,255] = #ffc8ff     very light blue       label = 2
-        armRight[0]= forearmR      color = [0,255,0]     = #00ff00     green                 label = 3
-        armRight[1] = upperarmR    color = [200,255,200] = #c8ffc8     very light green      label = 4
-        legRight[0] = thighR       color = [255,0,255]   = #ff00ff     purple                label = 5
-        legRight[1] = calfR        color = [255,180,255] = #ffb4ff     pink                  label = 6
-        legLeft[0] = thighL        color = [255,255,0]   = #ffff00     yellow                label = 7
-        legLeft[1] = calfL         color = [255,255,180] = #ffffb4     very light yellow     label = 8
-        head = headB               color = [255,0,0]     = #ff0000     red                   label = 9
-        body = body                color = [255,255,255] = #ffffff     white                 label = 10
-        handRight = right hand     color = [0,191,255]   = #00bfff     turquoise             label = 11
-        handLeft = left hand       color = [0,100,0]     = #006400     dark green            label = 12
-        footRight = right foot     color = [199,21,133]  = #c715ff     dark purple           label = 13
-        footLeft = left foot       color = [255,165,0]   = #ffa500     orange                label = 14
-        '''
 
 
-    def BodyLabelling(self):
-        '''Create label for each body part in the depth_image'''
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        Size = self.depth_image.shape
-        self.labels = np.zeros(Size,np.int)
-        self.labelList = np.zeros((self.bdyPart.shape[0]+1, Size[0], Size[1]),np.int)
-        Txy = self.transCrop
-        for i in range(self.bdyPart.shape[0]):
-            self.labels[Txy[1]:Txy[3],Txy[0]:Txy[2]] += (i+1)*self.bdyPart[i]
-            self.labelList[i+1, Txy[1]:Txy[3],Txy[0]:Txy[2]] += (self.bdyPart[i] + self.overlapmap[i])
-            self.labelList[i+1] = (self.labelList[i+1]>0)
-            # if some parts overlay, the number of this part will bigger
-            overlap = np.where(self.labels > (i+1) )
-            #put the overlapping part in the following body part
-            self.labels[overlap] = i+1
-
-    def AddOverlap(self):
-        """
-        add overlap region to each body part
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        interLineList = copy.deepcopy([\
-        [[self.segm.foreArmPtsL[0], self.segm.foreArmPtsL[1]], [self.segm.foreArmPtsL[2], self.segm.foreArmPtsL[3]]], \
-        [[self.segm.upperArmPtsL[0], self.segm.upperArmPtsL[3]], [self.segm.upperArmPtsL[1], self.segm.upperArmPtsL[2]]], \
-        [[self.segm.foreArmPtsR[0], self.segm.foreArmPtsR[1]], [self.segm.foreArmPtsR[2], self.segm.foreArmPtsR[3]]], \
-        [[self.segm.upperArmPtsR[0], self.segm.upperArmPtsR[3]], [self.segm.upperArmPtsR[2], self.segm.upperArmPtsR[1]]], \
-        [[self.segm.thighPtsR[0], self.segm.thighPtsR[1]], [self.segm.thighPtsR[2], self.segm.thighPtsR[3]]], \
-        [[self.segm.calfPtsR[0], self.segm.calfPtsR[1]], [self.segm.calfPtsR[2], self.segm.calfPtsR[3]]],
-        [[self.segm.thighPtsL[0],  self.segm.thighPtsL[1]], [self.segm.thighPtsL[2],self.segm.thighPtsL[3]]], \
-        [[self.segm.calfPtsL[0], self.segm.calfPtsL[1]], [self.segm.calfPtsL[2], self.segm.calfPtsL[3]]], \
-        [[self.segm.peakshoulderL.copy(), self.segm.peakshoulderR.copy()]], \
-        [[self.segm.upperArmPtsL[2], self.segm.upperArmPtsL[1]], [self.segm.peakshoulderL.copy(), self.segm.peakshoulderR.copy()], [self.segm.upperArmPtsR[1], self.segm.upperArmPtsR[2]], [self.segm.thighPtsR[1], self.segm.thighPtsR[0]], [self.segm.thighPtsR[0], self.segm.thighPtsL[1]]], \
-        [[self.segm.foreArmPtsR[3], self.segm.foreArmPtsR[2]]], \
-        [[self.segm.foreArmPtsL[3], self.segm.foreArmPtsL[2]]], \
-        [[self.segm.calfPtsL[1], self.segm.calfPtsL[0]]], \
-        [[self.segm.calfPtsR[1], self.segm.calfPtsR[0]]], \
-        ])
-        self.overlapmap = np.zeros((14, self.CroppedBox.shape[0], self.CroppedBox.shape[1]), np.int)
-        a = np.zeros((self.CroppedBox.shape[0], self.CroppedBox.shape[1]), np.int)
-        for i in range(len(interLineList)):
-            interLines = interLineList[i]
-            for j in range(len(interLines)):
-                interPoints = interLines[j]
-                rr,cc,val = line_aa(int(interPoints[0][1]), int(interPoints[0][0]), int(interPoints[1][1]), int(interPoints[1][0]))
-                self.overlapmap[i, rr, cc]=2
-            '''
-            Txy = self.transCrop
-            a += self.overlapmap[i]
-            a += self.bdyPart[i]
-        cv2.imshow("", a.astype(np.double)/2)
-        cv2.waitKey()
-        '''
-
-    def RGBDSegmentation(self):
-        """
-        Call every method to have a complete segmentation
-        :return: none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        self.Crop2Body()
-        self.BodySegmentation()
-        self.AddOverlap()
-        self.BodyLabelling()
 
 
 #######################################################################
 ################### Bounding boxes Function #######################
 ##################################################################
-
-    def GetCenter3D(self,i):
-        """
-        Compute the mean for one segmented part
-        :param i: number of the body part
-        :return: none
-        """
-        print("Call {}::{}".format(self.__class__.__name__,sys._getframe(0).f_code.co_name))
-        ctr_x = (max(self.PtCloud[i][:, 0])+min(self.PtCloud[i][:, 0]))/2
-        ctr_y = (max(self.PtCloud[i][:, 1])+min(self.PtCloud[i][:, 1]))/2
-        ctr_z = (max(self.PtCloud[i][:, 2])+min(self.PtCloud[i][:, 2]))/2
-        return [ctr_x, ctr_y, ctr_z]
 
 
     def SetTransfoMat3D(self,evecs,i):
@@ -867,7 +485,6 @@ class RGBD():
         self.mask.append([0.,0.,0.])
         self.BBsize = []
         self.BBsize.append([0.,0.,0.])
-        
         for i in range(1,self.bdyPart.shape[0]+1):
             self.mask.append( (self.labels == i) )
             # compute center of 3D
@@ -893,8 +510,6 @@ class RGBD():
 
         # create the skeleton vtx
         self.skeVtx = self.getSkeletonVtx()
-        print(self.skeVtx.shape)
-        exit()
 
     def FindCoord3D(self,i):
         '''
