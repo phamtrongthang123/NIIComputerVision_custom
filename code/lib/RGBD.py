@@ -893,8 +893,8 @@ class RGBD():
 
         # create the skeleton vtx
         self.skeVtx = self.getSkeletonVtx()
-        print(self.skeVtx.shape)
-        exit()
+        # print(self.skeVtx.shape)
+        # exit()
 
     def FindCoord3D(self,i):
         '''

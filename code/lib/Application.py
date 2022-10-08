@@ -418,7 +418,8 @@ class Application(tk.Frame):
             # Get the tranform matrix from the local coordinates system to the global system
             Tglo = self.RGBD[0].TransfoBB[bp]
             Tg.append(Tglo.astype(np.float32))
-
+        print(Tg)
+        exit()
         # Sum of the number of vertices and faces of all body parts
         nb_verticesGlo = 0
         nb_facesGlo = 0
