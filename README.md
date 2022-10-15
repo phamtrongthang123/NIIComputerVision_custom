@@ -1,6 +1,10 @@
 These are updated instructions to run the code: 
 
-# NIIComputerVision
+## My ver
+in `src`
+
+## NIIComputerVision
+in `code`
 
 This project use python 2.7
 

@@ -354,8 +354,8 @@ class Application(tk.Frame):
         Id4 = np.array([[1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]], dtype = np.float32)
 
         # number of images in the sequence. Start and End
-        self.Index = 4
-        nunImg = 8
+        self.Index = 24
+        nunImg = 200
         sImg = 1
 
         # Former Depth Image (i.e: i)
